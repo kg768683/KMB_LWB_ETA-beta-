@@ -72,17 +72,8 @@ if st.session_state.step == 1:
 
     st.write("Please enter your route number:")
     user_route_input = str(st.text_input("Route number", placeholder="route number eg: 1A, 84M, X42C")).upper()
-    try:
-        user_route_input = int(user_route_input)
-        if user_route_input >= 100:
-            route_num = str(user_route_input)
-            st.session_state.step = 4
-        elif user_route_input < 100:
-            bus_com = st.radio("Select the bus company", ["KMB", "CTB"])
-            route_num = str(user_route_input)
-    except ValueError:
-        bus_com = st.radio("Select the bus company", ["KMB", "CTB"])
-        route_num = str(user_route_input)
+    bus_com = st.radio("Select the bus company", ["KMB", "CTB"])
+    route_num = str(user_route_input)
 
     if user_route_input:
         if bus_com == "KMB":
@@ -257,7 +248,7 @@ if st.session_state.step == 3:
             else:
                 dt1 = datetime.fromisoformat(eta1_unsorted)
                 true_eta1 = dt1.strftime('%H:%M')
-                st.header(f"{true_eta1}      | {item["rmk_tc"]}")
+                st.header(f"{true_eta1}      | {item["rmk_tc"]}  |  {item["co"]}")
 
         if item["eta_seq"] == 2:
             eta2_unsorted = item["eta"]
@@ -267,7 +258,7 @@ if st.session_state.step == 3:
             else:
                 dt2 = datetime.fromisoformat(eta2_unsorted)
                 true_eta2 = dt2.strftime('%H:%M')
-                st.header(f"{true_eta2}      | {item["rmk_tc"]}")
+                st.header(f"{true_eta2}      | {item["rmk_tc"]}  |  {item["co"]}")
                 st.text(f"Last updated: {item['data_timestamp']}")
 
 
@@ -282,7 +273,7 @@ if st.session_state.step == 3:
                 tooltip=item["name_tc"],
             ).add_to(m)
 
-            st_data = st_folium(m, width = 700)
+            st_data = st_folium(m, width = 250, height= 250)
 
     return_to_rt_btn = st.button("Return to Route\n(Please click TWICE)")
     return_to_search_btn = st.button("Return to Search\n(Please click TWICE)")
@@ -413,29 +404,30 @@ if st.session_state.step == 12:
     st.header(f"{user_route} {user_selected_stop_tc} \n is as follows:")
 
     st.divider()
+    try:
+        for item in df_ctb_eta:
+            if item["eta_seq"] == 1:
+                eta1_unsorted = item["eta"]
+                if eta1_unsorted == None:
+                    st.title(f"NO ETA at current time")
+                    st.text(f"Last updated: {item['data_timestamp']}")
+                else:
+                    dt1 = datetime.fromisoformat(eta1_unsorted)
+                    true_eta1 = dt1.strftime('%H:%M')
+                    st.header(f"{true_eta1}      | {item["rmk_tc"]}  |  {item["co"]}")
 
-    for item in df_ctb_eta:
-        if item["eta_seq"] == 1:
-            eta1_unsorted = item["eta"]
-            if eta1_unsorted == None:
-                st.title(f"NO ETA at current time")
-                st.text(f"Last updated: {item['data_timestamp']}")
-            else:
-                dt1 = datetime.fromisoformat(eta1_unsorted)
-                true_eta1 = dt1.strftime('%H:%M')
-                st.header(f"{true_eta1}      | {item["rmk_tc"]}")
+            if item["eta_seq"] == 2:
+                eta2_unsorted = item["eta"]
+                if eta2_unsorted == None:
+                    st.title(f"NO ETA at current time")
 
-        if item["eta_seq"] == 2:
-            eta2_unsorted = item["eta"]
-            if eta2_unsorted == None:
-                st.title(f"NO ETA at current time")
-
-            else:
-                dt2 = datetime.fromisoformat(eta2_unsorted)
-                true_eta2 = dt2.strftime('%H:%M')
-                st.header(f"{true_eta2}      | {item["rmk_tc"]}")
-                st.text(f"Last updated: {item['data_timestamp']}")
-
+                else:
+                    dt2 = datetime.fromisoformat(eta2_unsorted)
+                    true_eta2 = dt2.strftime('%H:%M')
+                    st.header(f"{true_eta2}      | {item["rmk_tc"]}  |  {item["co"]}")
+                    st.text(f"Last updated: {item['data_timestamp']}")
+    except ValueError:
+        st.header("No ETA")
 
     if df_ctb_stl["stop"] == user_selected_stop_ID:
         lat_cor = df_ctb_stl["lat"]
@@ -447,7 +439,7 @@ if st.session_state.step == 12:
                         tooltip=df_ctb_stl["name_tc"],
                     ).add_to(m)
 
-        st_data = st_folium(m, width=700)
+        st_data = st_folium(m, width = 250, height= 250)
 
     return_to_rtctb_btn = st.button("Return to Route\n(Please click TWICE)")
     return_to_searchctb_btn = st.button("Return to Search\n(Please click TWICE)")
